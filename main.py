@@ -27,50 +27,10 @@ AUTO_REFRESH_MS = 120000
 ser = UART(0, 1200, bits=7, parity=2, stop=1)
 ser.write(b'\x1B\x3A\x6B\x76')
 utime.sleep_ms(300)
-ser = UART(0, 4800, bits=7, parity=2, stop=1)
-
-# ---- DIAGNOSTIC: raw GPIO test on RX pin (GP1) ----
-# Temporarily release UART so we can read GP1 as plain GPIO.
+# Fully release UART0 and reclaim RX pin before reinit at 4800
 ser.deinit()
-rx_pin = Pin(1, Pin.IN, Pin.PULL_UP)
-tx_ser = UART(0, 4800, bits=7, parity=2, stop=1, tx=Pin(0))
-
-tx_ser.write(b'\x0C')  # clear screen
-utime.sleep_ms(500)
-tx_ser.write(b'\x1F\x43\x41')  # move row 3, col 1
-tx_ser.write(b'GPIO TEST - press keys on Minitel')
-tx_ser.write(b'\x1F\x45\x41')  # move row 5, col 1
-tx_ser.write(b'Counting signal changes on GP1...')
-
-last_val = rx_pin.value()
-transitions = 0
-start = utime.ticks_ms()
-while utime.ticks_diff(utime.ticks_ms(), start) < 10000:  # 10 seconds
-    val = rx_pin.value()
-    if val != last_val:
-        transitions += 1
-        last_val = val
-    # Update display every 500ms
-    elapsed = utime.ticks_diff(utime.ticks_ms(), start)
-    if elapsed % 500 < 20:
-        tx_ser.write(b'\x1F\x47\x41')  # move row 7, col 1
-        tx_ser.write('Transitions: {}  Time: {}s  '.format(
-            transitions, elapsed // 1000))
-
-tx_ser.write(b'\x1F\x49\x41')  # move row 9, col 1
-if transitions > 0:
-    tx_ser.write('PASS - GP1 receives signal!')
-else:
-    tx_ser.write('FAIL - GP1 sees no signal.')
-
-tx_ser.write(b'\x1F\x4B\x41')  # move row 11, col 1
-tx_ser.write(b'Continuing to normal boot in 5s...')
-utime.sleep_ms(5000)
-
-# Restore normal UART
-tx_ser.deinit()
+Pin(1, Pin.IN, Pin.PULL_UP)
 ser = UART(0, 4800, bits=7, parity=2, stop=1)
-# ---- END DIAGNOSTIC ----
 
 if wifi.connect(SSID, PASSWORD):
     ntptime.settime()
