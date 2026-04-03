@@ -3,7 +3,7 @@
 A retro Minitel terminal server that brings modern data to vintage 1980s French hardware. Built with MicroPython on a Raspberry Pi Pico, it displays real-time Paris weather and metro departures using the authentic Minitel videotex protocol.
 
 ## Demo
-https://www.youtube.com/watch?v=aUsJFpJNq2Y
+[![](https://markdown-videos-api.jorgenkh.no/youtube/aUsJFpJNq2Y)](https://youtu.be/aUsJFpJNq2Y)
 
 ## Features
 
